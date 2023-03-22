@@ -1,0 +1,37 @@
+﻿@page "/portscan"
+
+
+<h1>PortScan</h1>
+
+@if (portNames is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Port Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var portName in portNames)
+            {
+                <tr>
+                    <td>@portName</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private string[] portNames;
+
+    protected override void OnInitialized()
+    {
+        portNames = Maui.Serial.SerialPort.GetPortNames();
+    }
+
+}

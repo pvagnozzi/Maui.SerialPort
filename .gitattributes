@@ -1,0 +1,11 @@
+# Auto detect text files and perform LF normalization
+*           text=auto eol=lf
+
+*.cs        text diff=csharp
+*.cshtml    text diff=html
+*.csx       text diff=csharp
+*.sln       text merge=union
+*.csproj    text merge=union
+*.sh        text diff=bash
+*.env       text
+*ockerfile  text
