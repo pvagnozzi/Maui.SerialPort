@@ -20,6 +20,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Remove="Platforms\Android\Usb\UsbSerialPortMonitor.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <PackageReference Include="System.IO.Ports" Version="7.0.0" />
 	</ItemGroup>
 

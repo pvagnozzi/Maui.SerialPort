@@ -14,11 +14,35 @@ public class SerialPort : ISerialPort
     [DebuggerStepThrough]
     public void Open(SerialPortParameters parameters) => throw new NotSupportedException();
 
-    [DebuggerStepThrough]
-    public int Read(byte[] data, int timeout = -1) => throw new NotSupportedException();
+    public int Read(byte[] data)
+    {
+        throw new NotImplementedException();
+    }
 
-    [DebuggerStepThrough]
-    public void Write(byte[] data, int timeout = -1) => throw new NotSupportedException();
+    public string ReadLine()
+    {
+        throw new NotImplementedException();
+    }
+
+    public string ReadExisting()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Write(byte[] data)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Write(string value)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void WriteLine(string line)
+    {
+        throw new NotImplementedException();
+    }
 
     [DebuggerStepThrough]
     public void Close() => throw new NotSupportedException();
@@ -26,6 +50,7 @@ public class SerialPort : ISerialPort
     [DebuggerStepThrough]
     public void Dispose() => GC.SuppressFinalize(this);
 
-    public event EventHandler<SerialDataReceivedArgs> DataReceived;
-    public event EventHandler<UnhandledExceptionEventArgs> ErrorReceived;
+    public event EventHandler<SerialPortDataReceivedEventArgs> DataReceived;
+
+    public event EventHandler<SerialPortErrorEventArgs> ErrorReceived;
 }

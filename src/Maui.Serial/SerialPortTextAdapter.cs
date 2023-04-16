@@ -21,7 +21,7 @@ public class SerialPortTextAdapter : IDisposable
     public string Read(int timeout = -1)
     {
         var buffer = new byte[SerialPort.Parameters.ReadBufferSize];
-        var length = SerialPort.Read(buffer, timeout);
+        var length = SerialPort.Read(buffer);
         var result = length > 0 ? Encoding.GetString(buffer, 0, length) : string.Empty;
 
         if (string.IsNullOrEmpty(_buffer))
@@ -37,7 +37,7 @@ public class SerialPortTextAdapter : IDisposable
     public string ReadLine(int timeout = -1)
     {
         var sb = new StringBuilder();
-        
+
         while (true)
         {
             var token = Read(timeout);
@@ -69,7 +69,7 @@ public class SerialPortTextAdapter : IDisposable
 
     [DebuggerStepThrough]
     public virtual void Write(string value, int timeout = -1) =>
-        SerialPort.Write(Encoding.GetBytes(value), timeout);
+        SerialPort.Write(Encoding.GetBytes(value));
 
     [DebuggerStepThrough]
     public virtual void WriteLine(string value, int timeout = -1) =>

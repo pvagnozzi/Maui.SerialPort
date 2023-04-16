@@ -14,7 +14,9 @@ public class UsbPermissionReceiver : BroadcastReceiver
 
     public override void OnReceive(Context context, Intent intent)
     {
+#pragma warning disable CA1422
         intent.GetParcelableExtra(UsbManager.ExtraDevice);
+#pragma warning restore CA1422
         var permissionGranted = intent.GetBooleanExtra(UsbManager.ExtraPermissionGranted, false);
         context.UnregisterReceiver(this);
         CompletionSource.TrySetResult(permissionGranted);

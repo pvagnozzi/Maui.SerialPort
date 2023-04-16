@@ -15,7 +15,7 @@ public class SerialPort : ISerialPort
 
     [DebuggerStepThrough]
     public static string[] GetPortNames(ILogger logger = null) =>
-        GetPortNames(Platform.CurrentActivity);
+        GetPortNames(Platform.CurrentActivity, logger);
 
     public static string[] GetPortNames(Activity activity, ILogger logger = null)
     {
@@ -26,7 +26,7 @@ public class SerialPort : ISerialPort
         _usbManager = activity.GetUsbManager();
 
         var usbProber = new UsbDeviceProber(logger);
-        usbProber.RegisterDriver(typeof(SerialPort).Assembly);
+        usbProber.RegisterDriver(typeof(ISerialPort).Assembly);
 
         if (_usbManager.DeviceList is null)
         {
@@ -54,27 +54,23 @@ public class SerialPort : ISerialPort
     private UsbSerialPort GetPortByName(string name)
     {
         var port = _ports.FirstOrDefault(x => x.PortName == name);
-        if (port is null)
-        {
-            throw new ArgumentException($"Port {PortName} does not exists");
-        }
-
-        return port;
+        return port ?? throw new ArgumentException($"Port {PortName} does not exists");
     }
+
+    private readonly List<byte> _readBuffer = new();
+    private readonly PollingTask _pollingTask;
+    private byte[] _pollingBuffer;
 
     public SerialPort(string portName, SerialPortParameters parameters = null)
     {
         UsbSerialPort = GetPortByName(portName);
         UsbSerialPort.Parameters = parameters ?? new SerialPortParameters();
-        UsbSerialPortMonitor = new UsbSerialPortMonitor(UsbSerialPort);
+        _pollingTask = new PollingTask(PollingAction);
     }
 
     protected internal UsbSerialPort UsbSerialPort { get; }
 
-    protected internal UsbSerialPortMonitor UsbSerialPortMonitor { get; }
-
     public string PortName => UsbSerialPort.PortName;
-
     public SerialPortParameters Parameters => UsbSerialPort.Parameters;
 
     public void Open(SerialPortParameters parameters)
@@ -82,21 +78,62 @@ public class SerialPort : ISerialPort
         Close();
         UsbSerialPort.Parameters = parameters;
         UsbSerialPort.Open();
-        UsbSerialPortMonitor.Start();
+
+        var bufferSize = UsbSerialPort.Parameters.ReadBufferSize;
+        _pollingBuffer = new byte[bufferSize];
+        _pollingTask.Start();
     }
 
     [DebuggerStepThrough]
-    public int Read(byte[] data, int timeout = -1) =>
-        UsbSerialPort.Read(data, timeout);
+    public int Read(byte[] data) => UsbSerialPort.Read(data);
+
+    public string ReadLine()
+    {
+        var data = _readBuffer.ToArray();
+        var separator = Parameters.Encoding.GetBytes(Parameters.NewLine);
+
+        var index = Array.IndexOf(data, separator[0]);
+        if (index < 0)
+        {
+            return string.Empty;
+        }
+
+        var len = index;
+        if (separator.Length > 1)
+        {
+            if (index + 1 >= data.Length || data[index + 1] != separator[1])
+            {
+                return string.Empty;
+            }
+            len++;
+        }
+
+        var line = Parameters.Encoding.GetString(data, 0, index);
+        _readBuffer.RemoveRange(0, len);
+        return line;
+    }
+
+    public string ReadExisting()
+    {
+        var data = _readBuffer.ToArray();
+        _readBuffer.Clear();
+        return Parameters.Encoding.GetString(data);
+    }
 
     [DebuggerStepThrough]
-    public void Write(byte[] data, int timeout = -1) =>
-        UsbSerialPort.Write(data, timeout);
+    public void Write(byte[] data) => UsbSerialPort.Write(data);
+
+    [DebuggerStepThrough]
+    public void Write(string value) => Write(Parameters.Encoding.GetBytes(value));
+
+    [DebuggerStepThrough]
+    public void WriteLine(string line) => Write(line + Parameters.NewLine);
 
     [DebuggerStepThrough]
     public void Close()
     {
-        UsbSerialPortMonitor.Stop();
+        _readBuffer.Clear();
+        _pollingTask.Stop();
         UsbSerialPort.Close();
     }
 
@@ -107,20 +144,27 @@ public class SerialPort : ISerialPort
         GC.SuppressFinalize(this);
     }
 
-    public event EventHandler<SerialDataReceivedArgs> DataReceived
-    {
-        add
-        {
-            UsbSerialPortMonitor.DataReceived += value;
-            UsbSerialPortMonitor.Start();
-        }
-            
-        remove => UsbSerialPortMonitor.DataReceived -= value;
-    }
+    public event EventHandler<SerialPortDataReceivedEventArgs> DataReceived;
 
-    public event EventHandler<UnhandledExceptionEventArgs> ErrorReceived
+    public event EventHandler<SerialPortErrorEventArgs> ErrorReceived;
+
+    private void PollingAction(CancellationToken cancellation)
     {
-        add => UsbSerialPortMonitor.ErrorReceived += value;
-        remove => UsbSerialPortMonitor.ErrorReceived -= value;
+        if (cancellation.IsCancellationRequested)
+        {
+            throw new TaskCanceledException();
+        }
+
+        try
+        {
+            var len = UsbSerialPort.Read(_pollingBuffer);
+            _readBuffer.AddRange(_pollingBuffer.Take(len));
+            DataReceived?.Invoke(this, new SerialPortDataReceivedEventArgs());
+        }
+        catch (Exception)
+        {
+            ErrorReceived?.Invoke(this, new SerialPortErrorEventArgs(SerialPortError.Frame));
+        }
+
     }
 }

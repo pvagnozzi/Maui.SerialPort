@@ -12,6 +12,6 @@ public interface ISerialPort : IDisposable
     void WriteLine(string line);
     void Close();
 
-    event EventHandler<SerialDataReceivedArgs> DataReceived;
-    event EventHandler<UnhandledExceptionEventArgs> ErrorReceived;
+    event EventHandler<SerialPortDataReceivedEventArgs> DataReceived;
+    event EventHandler<SerialPortErrorEventArgs> ErrorReceived;
 }
