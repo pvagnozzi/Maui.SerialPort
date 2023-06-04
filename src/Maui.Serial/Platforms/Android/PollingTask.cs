@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace Maui.Serial;
+namespace Maui.Serial.Platforms.Android;
 
 internal class PollingTask : IDisposable
 {

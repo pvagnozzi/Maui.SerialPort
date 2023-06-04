@@ -29,7 +29,7 @@ internal class UsbDeviceProber
 
         Drivers.Add(driverId, driverType);
     }
-    
+
     [DebuggerStepThrough]
     public void RegisterDriver(IEnumerable<UsbDeviceDriverId> driverIds, Type driverType)
     {
@@ -65,12 +65,13 @@ internal class UsbDeviceProber
     }
 
     [DebuggerStepThrough]
-    public IEnumerable<UsbDeviceDriver> Scan(UsbManager usbManager) => 
-        usbManager.DeviceList?.Select(device => ProbeDevice(usbManager, device.Value)).Where(driver => driver is not null);
+    public IEnumerable<UsbDeviceDriver> Scan(UsbManager usbManager) => usbManager.DeviceList
+        ?.Select(device => ProbeDevice(usbManager, device.Value)).Where(driver => driver is not null);
 
     public UsbDeviceDriver ProbeDevice(UsbManager usbManager, UsbDevice usbDevice)
     {
-        usbManager.RequestPermission(usbDevice, null);
+        usbManager.RequestPermission(usbDevice);
+
         var vendorId = usbDevice.VendorId;
         var productId = usbDevice.ProductId;
 

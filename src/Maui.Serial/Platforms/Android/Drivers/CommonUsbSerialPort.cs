@@ -59,18 +59,9 @@ public abstract class CommonUsbSerialPort : UsbSerialPort
         CloseConnection();
     }
 
-    public override int Read(byte[] dest, int timeout = -1)
-    {
-        var len = ReadBufferFromDevice(dest.Length);
-        _readBuffer.CopyTo(dest, len);
-        return len;
-    }
+    public override int Read(byte[] dest) => ReadBufferFromDevice(dest.Length);
 
-    public override int Write(byte[] src, int timeout = -1)
-    {
-        src.CopyTo(_writeBuffer, src.Length);
-        return WriteBufferToDevice(src.Length);
-    }
+    public override int Write(byte[] src) => WriteBufferToDevice(src.Length);
 
     protected void SetReadEndPoint(UsbEndpoint usbEndpoint)
     {
@@ -97,8 +88,13 @@ public abstract class CommonUsbSerialPort : UsbSerialPort
         {
             var buffer = new byte[len];
             var read = ReadFromDevice(buffer);
-            toRead -= read;
-            result.AddRange(buffer);
+            if (read > 0)
+            {
+                toRead -= read;
+                result.AddRange(buffer);
+                continue;
+            }
+            break;
         }
 
         return CopyToReadBuffer(result.ToArray(), _readBuffer);
@@ -113,18 +109,41 @@ public abstract class CommonUsbSerialPort : UsbSerialPort
             var buffer = CopyFromWriteBuffer(_writeBuffer, offset, len);
             var written = WriteToDevice(buffer);
             offset += written;
+
         }
 
         return offset;
     }
 
-    [DebuggerStepThrough]
-    protected virtual int ReadFromDevice(byte[] buffer) =>
-        UsbConnection.BulkTransfer(ReadEndPoint, buffer, buffer.Length, 10);
+    protected virtual int ReadFromDevice(byte[] buffer)
+    {
+        var len = Math.Min(buffer.Length, Parameters.ReadBufferSize);
+        lock (_readBufferLock)
+        {
+            len = UsbConnection.BulkTransfer(ReadEndPoint, _readBuffer, len, Parameters.ReadTimeout);
+            if (len > 0)
+            {
+                Buffer.BlockCopy(_readBuffer, 0, buffer, 0, len);
+            }
+        }
 
-    [DebuggerStepThrough]
-    protected virtual int WriteToDevice(byte[] buffer) =>
-        UsbConnection.BulkTransfer(WriteEndPoint, buffer, buffer.Length, 10);
+        return len;
+    }
+
+    protected virtual int WriteToDevice(byte[] buffer)
+    {
+        var len = Math.Min(buffer.Length, Parameters.ReadBufferSize);
+        lock (_writeBufferLock)
+        {
+            len = UsbConnection.BulkTransfer(WriteEndPoint, buffer, len, Parameters.WriteTimeout);
+            if (len > 0)
+            {
+                Buffer.BlockCopy(_readBuffer, 0, buffer, 0, len);
+            }
+        }
+
+        return len;
+    }
 
     protected virtual int CopyToReadBuffer(byte[] source, byte[] destination)
     {

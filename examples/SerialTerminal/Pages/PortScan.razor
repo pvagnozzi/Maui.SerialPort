@@ -1,4 +1,6 @@
 ﻿@page "/portscan"
+@using Maui.Serial
+@using System.Text
 
 
 <h1>PortScan</h1>
@@ -20,6 +22,7 @@ else
             {
                 <tr>
                     <td>@portName</td>
+                    <td><button class="btn btn-primary" @onclick="() => Connect(portName)">Connect</button></td>
                 </tr>
             }
         </tbody>
@@ -31,7 +34,33 @@ else
 
     protected override void OnInitialized()
     {
-        portNames = Maui.Serial.SerialPort.GetPortNames();
+
+        portNames = SerialPortManager.GetPortNames().ToArray();
+
     }
 
+    private void Connect(string portName)
+    {
+        using var port = SerialPortManager.GetPort(portName);
+
+        port.Open();
+        port.WriteLine("M115");
+        var sb = new StringBuilder();
+
+        while (true)
+        {
+            var line = port.ReadLine();
+            if (!string.IsNullOrEmpty(line))
+            {
+                sb.AppendLine(line);
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        var result = sb.ToString();
+        Console.WriteLine(result);
+    }
 }

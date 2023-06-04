@@ -41,8 +41,8 @@ public abstract class UsbSerialPort : UsbConnectionDriver
     public string PortName => $"{UsbDevice.DeviceName}/{PortNumber}";
     public SerialPortParameters Parameters { get; set; }
 
-    public abstract int Read(byte[] dest, int timeout = -1);
-    public abstract int Write(byte[] src, int timeout = -1);
+    public abstract int Read(byte[] dest);
+    public abstract int Write(byte[] src);
 
     public abstract bool GetCD();
     public abstract bool GetCTS();

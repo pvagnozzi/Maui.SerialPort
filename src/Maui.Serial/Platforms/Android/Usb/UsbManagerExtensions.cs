@@ -6,19 +6,17 @@ namespace Maui.Serial.Platforms.Android.Usb;
 
 public static class UsbManagerExtensions
 {
-    public static Task<bool> RequestPermissionAsync(this UsbManager manager, UsbDevice device, Context context,
-        string permission, TaskCompletionSource<bool> completionSource = null)
+    public static void RequestPermission(this UsbManager usbManager, UsbDevice usbDevice)
     {
-        completionSource ??= new TaskCompletionSource<bool>();
-        var usbPermissionReceiver = new UsbPermissionReceiver(completionSource);
-        context.RegisterReceiver(usbPermissionReceiver, new IntentFilter(permission));
-        var intent = PendingIntent.GetBroadcast(context, 0, new Intent(permission), 0);
-        manager.RequestPermission(device, intent);
-        return completionSource.Task;
+        if (usbManager.HasPermission(usbDevice))
+        {
+            return;
+        }
+
+        usbManager.RequestPermission(usbDevice, null);
     }
 
     public static UsbManager GetUsbManager(this Activity activity) =>
 
         (UsbManager)activity.GetSystemService(Context.UsbService);
-    
 }

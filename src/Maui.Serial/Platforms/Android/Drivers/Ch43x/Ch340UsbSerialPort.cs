@@ -180,8 +180,6 @@ public class Ch340UsbSerialPortDriver : CommonUsbSerialPort
             throw new IOException("init failed! #2");
         }
 
-        SetBaudRate(DEFAULT_BAUD_RATE);
-
         CheckState("init #4", 0x95, 0x2518, new[] { -1 /* 0x56, c3*/, 0x00 });
 
         if (ControlOut(0x9a, 0x2518, 0x0050) < 0)
@@ -196,7 +194,6 @@ public class Ch340UsbSerialPortDriver : CommonUsbSerialPort
             throw new IOException("init failed! #7");
         }
 
-        SetBaudRate(DEFAULT_BAUD_RATE);
         SetControlLines();
         CheckState("init #10", 0x95, 0x0706, new[] { -1 /* 0x9f, 0xff*/, 0xee });
     }

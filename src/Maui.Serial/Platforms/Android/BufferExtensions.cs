@@ -11,12 +11,12 @@ public static class BufferExtensions
 
     public static ByteBuffer GetBuffer(this ByteBuffer buffer, JavaArray<byte> dst, int dstOffset, int byteCount)
     {
-        if (_byteBufferClassRef == nint.Zero)
+        if (_byteBufferClassRef == 0)
         {
             _byteBufferClassRef = JNIEnv.FindClass("java/nio/ByteBuffer");
         }
 
-        if (_byteBufferGetBii == nint.Zero)
+        if (_byteBufferGetBii == 0)
         {
             _byteBufferGetBii = JNIEnv.GetMethodID(_byteBufferClassRef, "get", "([BII)Ljava/nio/ByteBuffer;");
         }
