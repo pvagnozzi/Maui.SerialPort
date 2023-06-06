@@ -200,7 +200,6 @@ public class Ch340UsbSerialPortDriver : CommonUsbSerialPort
 
     private void SetBaudRate(int baudRate)
     {
-
         for (var i = 0; i < _baudCodes.Length / 3; i++)
         {
             if (_baudCodes[i * 3] != baudRate)

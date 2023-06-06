@@ -1,6 +1,4 @@
-﻿using Android.App;
-using Android.Hardware.Usb;
-using Maui.Serial.Platforms.Android.Usb;
+﻿using Maui.Serial.Platforms.Android.Usb;
 using Microsoft.Extensions.Logging;
 
 namespace Maui.Serial.Platforms.Android;
@@ -18,7 +16,6 @@ public class SerialPortAndroid : SerialPortBase
     private readonly List<byte> _readBuffer = new();
     private readonly PollingTask _pollingTask;
     private byte[] _pollingBuffer;
-
 
     protected internal UsbSerialPort UsbSerialPort { get; }
 
@@ -87,15 +84,16 @@ public class SerialPortAndroid : SerialPortBase
         try
         {
             var len = UsbSerialPort.Read(_pollingBuffer);
-            if (len > 0)
+            if (len <= 0)
             {
-                _readBuffer.AddRange(_pollingBuffer.Take(len));
-                OnDataReceived();
+                return;
             }
+
+            _readBuffer.AddRange(_pollingBuffer.Take(len));
+            OnDataReceived();
         }
-        catch(Exception ex)
+        catch
         {
-            Console.WriteLine(ex);
             OnErrorReceived();
         }
     }
@@ -108,6 +106,5 @@ public class SerialPortAndroid : SerialPortBase
         }
 
         ReadToBuffer();
-
     }
 }

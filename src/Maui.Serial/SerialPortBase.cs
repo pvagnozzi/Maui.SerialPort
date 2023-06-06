@@ -9,11 +9,8 @@ public abstract class SerialPortBase : ISerialPort
     {
         PortName = portName;
         Parameters = parameters ?? new SerialPortParameters();
-        Logger = logger;
         IsOpen = false;
     }
-
-    protected ILogger Logger { get; }
 
     public string PortName { get; }
 
@@ -94,15 +91,9 @@ public abstract class SerialPortBase : ISerialPort
 
     public event EventHandler<SerialPortErrorEventArgs> ErrorReceived;
 
-    protected virtual void OpenPort(string portName, SerialPortParameters parameters)
-    {
-        throw new NotImplementedException();
-    }
+    protected abstract void OpenPort(string portName, SerialPortParameters parameters);
 
-    protected virtual void ClosePort()
-    {
-        throw new NotImplementedException();
-    }
+    protected abstract void ClosePort();
 
     protected virtual void EnsurePortIsOpen()
     {
@@ -113,23 +104,22 @@ public abstract class SerialPortBase : ISerialPort
     }
 
     [DebuggerStepThrough]
-    protected virtual int ReadFromPort(byte[] data) => throw new NotSupportedException();
+    protected abstract int ReadFromPort(byte[] data);
 
     [DebuggerStepThrough]
-    protected virtual string ReadLineFromPort() => throw new NotSupportedException();
-
-
-    [DebuggerStepThrough]
-    protected virtual string ReadExistingFromPort() => throw new NotSupportedException();
+    protected abstract string ReadLineFromPort();
 
     [DebuggerStepThrough]
-    protected virtual void WriteToPort(byte[] data) => throw new NotSupportedException();
+    protected abstract string ReadExistingFromPort();
 
     [DebuggerStepThrough]
-    protected virtual void WriteToPort(string value) => throw new NotSupportedException();
+    protected abstract void WriteToPort(byte[] data);
 
     [DebuggerStepThrough]
-    protected virtual void WriteLineToPort(string line) => throw new NotSupportedException();
+    protected abstract void WriteToPort(string value);
+
+    [DebuggerStepThrough]
+    protected abstract void WriteLineToPort(string line);
 
     protected void OnDataReceived(SerialDataEventType eventType = SerialDataEventType.Chars) =>
         DataReceived?.Invoke(this, new SerialPortDataReceivedEventArgs(eventType));

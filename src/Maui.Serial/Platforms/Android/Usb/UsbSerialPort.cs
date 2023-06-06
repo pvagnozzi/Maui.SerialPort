@@ -43,7 +43,6 @@ public abstract class UsbSerialPort : UsbConnectionDriver
 
     public abstract int Read(byte[] dest);
     public abstract int Write(byte[] src);
-
     public abstract bool GetCD();
     public abstract bool GetCTS();
     public abstract bool GetDSR();

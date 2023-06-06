@@ -2,8 +2,8 @@ using System.Diagnostics;
 using Android.Hardware.Usb;
 using Maui.Serial.Platforms.Android.Usb;
 using Microsoft.Extensions.Logging;
-// ReSharper disable InconsistentNaming
 
+// ReSharper disable InconsistentNaming
 namespace Maui.Serial.Platforms.Android.Drivers;
 
 public abstract class CommonUsbSerialPort : UsbSerialPort
@@ -13,18 +13,13 @@ public abstract class CommonUsbSerialPort : UsbSerialPort
     private byte[] _readBuffer = Array.Empty<byte>();
     private byte[] _writeBuffer = Array.Empty<byte>();
 
-    protected CommonUsbSerialPort(
-        UsbManager manager,
-        UsbDevice device,
-        int portNumber,
-        ILogger logger) :
+    protected CommonUsbSerialPort(UsbManager manager, UsbDevice device, int portNumber, ILogger logger) :
         base(manager, device, portNumber, logger)
     {
     }
 
     protected UsbEndpoint ReadEndPoint { get; private set; }
     protected UsbEndpoint WriteEndPoint { get; private set; }
-
 
     public override void Open()
     {
@@ -94,6 +89,7 @@ public abstract class CommonUsbSerialPort : UsbSerialPort
                 result.AddRange(buffer);
                 continue;
             }
+
             break;
         }
 
@@ -159,10 +155,6 @@ public abstract class CommonUsbSerialPort : UsbSerialPort
         return buffer;
     }
 
-    [DebuggerStepThrough]
-    protected virtual UsbDeviceConnection OpenConnection(UsbManager usbManager) =>
-        usbManager.OpenDevice(UsbDevice);
-
     protected virtual void CloseConnection()
     {
         UsbConnection.Close();
@@ -210,9 +202,7 @@ public abstract class CommonUsbSerialPort : UsbSerialPort
     protected abstract void SetInterfaces(UsbDevice device);
 
     [DebuggerStepThrough]
-    protected abstract void SetParameters(
-        UsbDeviceConnection connection,
-        SerialPortParameters parameters);
+    protected abstract void SetParameters(UsbDeviceConnection connection, SerialPortParameters parameters);
 
     [DebuggerStepThrough]
     protected virtual int ControlTransfer(UsbAddressing requestType, int request, int value, int index,

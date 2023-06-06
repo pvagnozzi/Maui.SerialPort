@@ -10,4 +10,7 @@ public record SerialPortParameters(int BaudRate = 115200, DataBits DataBits = Da
     public Encoding Encoding { get; } = Encoding ?? Encoding.UTF8;
 
     public string NewLine { get; } = NewLine ?? "\n";
+
+    public override string ToString() =>
+        $"BaudRate: {BaudRate}, DataBits: {DataBits}, StopBits: {StopBits}, Partity: {Partity}, FlowControl: {FlowControl}, ReadBufferSize: {ReadBufferSize}, WriteBufferSize: {WriteBufferSize}, ReadTimeout: {ReadTimeout}, WriteTimeout: {WriteTimeout}, NewLine: {NewLine}, Encoding: {Encoding}";
 }

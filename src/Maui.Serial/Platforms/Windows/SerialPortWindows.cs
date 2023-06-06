@@ -1,12 +1,11 @@
-﻿using System.Diagnostics;
-using System.IO.Ports;
+﻿using System.IO.Ports;
 using Microsoft.Extensions.Logging;
 using IOPort = System.IO.Ports.SerialPort;
 
 // ReSharper disable once CheckNamespace
 namespace Maui.Serial.Platforms.Windows;
 
-public class SerialPortWindows: SerialPortBase
+public class SerialPortWindows : SerialPortBase
 {
     public SerialPortWindows(string portName, SerialPortParameters parameters = null, ILogger logger = null) : base(portName,
         parameters, logger)
@@ -47,7 +46,7 @@ public class SerialPortWindows: SerialPortBase
         {
             return string.Empty;
         }
-    } 
+    }
 
     protected override string ReadExistingFromPort() => Port.ReadExisting();
 
@@ -55,10 +54,8 @@ public class SerialPortWindows: SerialPortBase
 
     protected override void WriteToPort(string value) => Port.Write(value);
 
-    [DebuggerStepThrough]
     protected override void WriteLineToPort(string line) => Port.WriteLine(line);
 
-    [DebuggerStepThrough]
     protected override void ClosePort()
     {
         if (Port is null)

@@ -1,5 +1,4 @@
-﻿// ReSharper disable once CheckNamespace
-namespace Maui.Serial;
+﻿namespace Maui.Serial;
 
 internal static partial class SerialPortPlatform
 {
