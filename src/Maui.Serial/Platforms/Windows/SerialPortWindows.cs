@@ -1,6 +1,5 @@
 ﻿using System.IO.Ports;
 using Microsoft.Extensions.Logging;
-using IOPort = System.IO.Ports.SerialPort;
 
 // ReSharper disable once CheckNamespace
 namespace Maui.Serial.Platforms.Windows;
@@ -12,11 +11,11 @@ public class SerialPortWindows : SerialPortBase
     {
     }
 
-    protected IOPort Port { get; private set; }
+    protected SerialPort Port { get; private set; }
 
     protected override void OpenPort(string portName, SerialPortParameters parameters)
     {
-        Port = new IOPort(PortName, parameters!.BaudRate, System.IO.Ports.Parity.None)
+        Port = new SerialPort(PortName, parameters!.BaudRate, ConvertParity(parameters.Partity))
         {
             ReadBufferSize = Parameters.ReadBufferSize,
             ReadTimeout = Parameters.ReadTimeout,
@@ -67,4 +66,23 @@ public class SerialPortWindows : SerialPortBase
         Port.Dispose();
         Port = null;
     }
+
+    private static System.IO.Ports.Parity ConvertParity(Parity parity) => parity switch
+    {
+        Parity.Even => System.IO.Ports.Parity.Even,
+        Parity.Mark => System.IO.Ports.Parity.Mark,
+        Parity.None => System.IO.Ports.Parity.None,
+        Parity.Odd => System.IO.Ports.Parity.Odd,
+        Parity.Space => System.IO.Ports.Parity.Space,
+        _ => throw new ArgumentOutOfRangeException(nameof(parity), parity, null)
+    };
+
+    private static System.IO.Ports.StopBits ConvertStopBits(StopBits stopBits) => stopBits switch
+    {
+        StopBits.NotSet => System.IO.Ports.StopBits.None,
+        StopBits.One => System.IO.Ports.StopBits.One,
+        StopBits.OnePointFive => System.IO.Ports.StopBits.OnePointFive,
+        StopBits.Two => System.IO.Ports.StopBits.Two,
+        _ => throw new ArgumentOutOfRangeException(nameof(stopBits), stopBits, null)
+    };
 }

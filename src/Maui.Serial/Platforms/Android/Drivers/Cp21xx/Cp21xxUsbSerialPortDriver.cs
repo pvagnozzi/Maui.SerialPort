@@ -88,8 +88,6 @@ public class Cp21xxUsbSerialPort : CommonUsbSerialPort
                 break;
             case Parity.Space:
                 break;
-            case Parity.NotSet:
-                break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(parameters.Partity), parameters.Partity, null);
         }
